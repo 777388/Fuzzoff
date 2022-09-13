@@ -1,0 +1,16 @@
+import os
+import sys
+
+print("Usage: Python3 fuzzoff.py path/to/links.txt path/to/wordlist.txt output.txt")
+fuzz = sys.argv[2]
+links = sys.argv[1]
+output = open(sys.argv[3], 'w')
+with open(fuzz, 'r', encoding='utf-8') as file:
+    for line in file:
+        with open(links, 'r') as filed:
+            for fline in filed:
+                newstring = fline.rstrip().replace("FUZZ", line.rstrip())
+                code = os.popen("curl -m 3.3 -so /dev/null \""+newstring.rstrip()+"\ -w '%{http_code}'").read()
+                size = os.popen("curl -m 3.3 -so /dev/null \'"+newstring.rstrip()+"\' -w  '%{size_request}'").read()
+                print(newstring.rstrip(), end='\r', flush='true')
+                print(newstring.rstrip()+"  "+code+"  "+size, file=output)
